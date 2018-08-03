@@ -161,6 +161,8 @@
     ctx._pfFilter.results = $(RESULTS_SELECTOR, opts.toolbarSelector); // Toolbar results row
     ctx._pfFilter.filterCaseInsensitive = opts.filterCaseInsensitive; // Filter filter case insensitive
     ctx._pfFilter.filterResults = $(FILTER_RESULTS_SELECTOR, opts.toolbarSelector); // Toolbar filter results
+    ctx._pfFilter.filterOnSelect = false; // Set applying filter behavior
+    ctx._pfFilter.filterFunction = null; // Filter function placeholder
 
     if (ctx._pfFilter.filterCols === undefined) {
       return;
@@ -195,6 +197,7 @@
       // Must match all filters
       if (ctx._pfFilter) {
         $.each(ctx._pfFilter.filters, function (index, filter) {
+          if (filter.customFilter) return true;
           if (ctx._pfFilter.filterCaseInsensitive !== undefined && ctx._pfFilter.filterCaseInsensitive === true) {
             if (data[filter.column].toLowerCase().indexOf(filter.value.toLowerCase()) === -1) {
               showThisRow = false;
@@ -220,6 +223,8 @@
    * @param {string} filter.column - Column associated with DataTable
    * @param {string} filter.name - Name of the filter
    * @param {string} filter.value - Value of the filter
+   * @param {boolean} filter.onSelect - true causes filter to take effect when selected in pull-down menu
+   * @param {function} filter.customFilter - function for custom filtering
    * @private
    */
   function addActiveFilterControl (dt, filter) {
@@ -227,17 +232,26 @@
     var i;
 
     // Append active filter control
-    ctx._pfFilter.activeFilterControls.append('<li><span class="label label-info">' + filter.name + ': ' +
+    ctx._pfFilter.activeFilterControls.append('<li><span class="label label-info">' + filter.name + ((filter.onSelect) ? ' ' : ': ') +
       filter.value + '<a href="#"><span class="pficon pficon-close"/></a></span></li>');
 
     // Handle click to clear active filter
     $("a", ctx._pfFilter.activeFilterControls).last().on("click", function (e) {
       // Find existing filter and remove
       for (i = 0; i < ctx._pfFilter.filters.length; i++) {
-        if (ctx._pfFilter.filters[i].column === filter.column && ctx._pfFilter.filters[i].value === filter.value) {
-          ctx._pfFilter.filters.splice(i, 1);
-          $(this).parents("li").remove();
-          break;
+        if (filter.customFilter) {
+          if (ctx._pfFilter.filters[i].name === filter.name) {
+            ctx._pfFilter.filters.splice(i, 1);
+            $.fn.dataTable.ext.search.splice(i+1, 1);
+            $(this).parents("li").remove();
+            break;
+          }
+        } else {
+          if (ctx._pfFilter.filters[i].column === filter.column && ctx._pfFilter.filters[i].value === filter.value) {
+            ctx._pfFilter.filters.splice(i, 1);
+            $(this).parents("li").remove();
+            break;
+          }
         }
       }
       if (ctx._pfFilter.filters.length === 0) {
@@ -258,6 +272,8 @@
    * @param {string} filter.column - Column associated with DataTable
    * @param {string} filter.name - Name of the filter
    * @param {string} filter.value - Value of the filter
+   * @param {boolean} filter.onSelect - true causes filter to take effect when selected in pull-down menu
+   * @param {function} filter.customFilter - function for custom filtering
    * @private
    */
   function addFilter (dt, filter) {
@@ -266,19 +282,19 @@
 
     // Find existing entry
     $.grep(ctx._pfFilter.filters, function (f) {
-      if (f.column === filter.column && f.value === filter.value) {
+      if (f.customFilter) {
+        if (f.name === filter.name && f.value === filter.value) {
+          found = true;
+        }
+      } else if (f.column === filter.column && f.value === filter.value) {
         found = true;
       }
     });
 
     // Add new filter
-    if (!found) {
-      ctx._pfFilter.filters.push(filter);
-      dt.draw();
-      addActiveFilterControl(dt, filter);
-      updateFilterResults(dt);
-    }
-    ctx._pfFilter.filterInput.val(""); // Clear input
+    if (!found) ctx._pfFilter.filters.push(filter);
+
+    return !found;
   }
 
   /**
@@ -290,6 +306,7 @@
   function clearFilters (dt) {
     var ctx = dt.settings()[0];
     ctx._pfFilter.filters.length = 0; // Reset filters
+    $.fn.dataTable.ext.search.length = 1; // Remove all but simple filter from DataTable
     ctx._pfFilter.activeFilterControls.html(""); // Remove active filter controls
     ctx._pfFilter.activeFilters.addClass("hidden"); // Hide active filters area
     dt.draw();
@@ -327,11 +344,24 @@
       if (keycode === 13) {
         e.preventDefault();
         if (this.value.trim().length > 0) {
-          addFilter(dt, {
+          var newFilter = {
             column: ctx._pfFilter.filterColumn,
             name: ctx._pfFilter.filterName,
-            value: this.value
-          });
+            value: this.value,
+            onSelect: false,
+            // If filterOnSelect is true, the custom filter will have already been
+            // added to the filter stack so we set it to null here. If the defined
+            // function is wrong type, set the function to simple all pass.
+            customFilter: (ctx._pfFilter.filterOnSelect) ? null : ctx._pfFilter.filterFunction
+          };
+
+          if (addFilter(dt, newFilter)) {
+            if (newFilter.customFilter) $.fn.dataTable.ext.search.push(newFilter.customFilter);
+            dt.draw();
+            addActiveFilterControl(dt, newFilter);
+            updateFilterResults(dt);
+          }
+          ctx._pfFilter.filterInput.val(""); // Clear input
         }
         return false;
       }
@@ -364,8 +394,38 @@
       if (ctx._pfFilter.filterButton !== undefined && ctx._pfFilter.filterButton.length !== 0) {
         ctx._pfFilter.filterButton.html($(this).text() + ' <span class="caret"></span>');
       }
-      ctx._pfFilter.filterColumn = i; // Save filter column when applying filter
+      // Save filter column when applying filter; maintain backwards compatibility
+      // with behavior prior to columnNum field.
+      ctx._pfFilter.filterColumn =
+        (ctx._pfFilter.filterCols[i].columnNum > 0 && ctx._pfFilter.filterCols[i].columnNum < ctx._pfFilter.filterCols.length) ?
+        ctx._pfFilter.filterCols[i].columnNum : i; // Save filter column when applying filter
+      ctx._pfFilter.filterOnSelect = ctx._pfFilter.filterCols[i].filterOnSelect; // Save applying filter behavior
+      // Save custom filter function when applying filter; if problem with function
+      // type, define all-pass fileter.
+      ctx._pfFilter.filterFunction = (ctx._pfFilter.filterCols[i].useCustomFilter) ?
+        (($.isFunction(ctx._pfFilter.filterCols[i].useCustomFilter) ?
+          ctx._pfFilter.filterCols[i].useCustomFilter : function allPass() {
+            console.warn('WARNING: custom filter function for option: \"', ctx._pfFilter.filterCols[i].placeholder,'\" set to non-function type; using all-pass filter instead.');
+            return true }))
+        : null;
       ctx._pfFilter.filterName = $(this).text(); // Save filter name for active filter control
+
+      if (ctx._pfFilter.filterOnSelect) {
+        var newFilter = {
+          column: ctx._pfFilter.filterColumn,
+          name: ctx._pfFilter.filterName,
+          value: "",
+          onSelect: true,
+          customFilter: ctx._pfFilter.filterFunction
+        };
+
+        if (addFilter(dt, newFilter)) {
+          if (newFilter.customFilter) $.fn.dataTable.ext.search.push(newFilter.customFilter);
+          dt.draw();
+          addActiveFilterControl(dt, newFilter);
+          updateFilterResults(dt);
+        }
+      }
     });
   }
 
@@ -399,6 +459,8 @@
    * @param {string} filter.column - Column associated with DataTable
    * @param {string} filter.name - Name of the filter
    * @param {string} filter.value - Value of the filter
+   * @param {boolean} filter.onSelect - true causes filter to take effect when selected in pull-down menu
+   * @param {function} filter.customFilter - function for custom filtering
    */
   DataTable.Api.register("pfFilter.addFilter()", function (filter) {
     return this.iterator("table", function (ctx) {
