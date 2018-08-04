@@ -197,7 +197,9 @@
       // Must match all filters
       if (ctx._pfFilter) {
         $.each(ctx._pfFilter.filters, function (index, filter) {
-          if (filter.customFilter) { return true; }
+          if (filter.customFilter) {
+            return true;
+          }
           if (ctx._pfFilter.filterCaseInsensitive !== undefined && ctx._pfFilter.filterCaseInsensitive === true) {
             if (data[filter.column].toLowerCase().indexOf(filter.value.toLowerCase()) === -1) {
               showThisRow = false;
@@ -293,7 +295,9 @@
     });
 
     // Add new filter
-    if (!found) { ctx._pfFilter.filters.push(filter); }
+    if (!found) {
+      ctx._pfFilter.filters.push(filter);
+    }
 
     return !found;
   }
@@ -357,7 +361,9 @@
         e.preventDefault();
         if (this.value.trim().length > 0) {
           if (addFilter(dt, newFilter)) {
-            if (newFilter.customFilter) { $.fn.dataTable.ext.search.push(newFilter.customFilter); }
+            if (newFilter.customFilter) {
+              $.fn.dataTable.ext.search.push(newFilter.customFilter);
+            }
             dt.draw();
             addActiveFilterControl(dt, newFilter);
             updateFilterResults(dt);
@@ -413,7 +419,7 @@
       // type, define all-pass fileter.
       ctx._pfFilter.filterFunction = (ctx._pfFilter.filterCols[i].useCustomFilter) ?
         (($.isFunction(ctx._pfFilter.filterCols[i].useCustomFilter) ?
-          ctx._pfFilter.filterCols[i].useCustomFilter : function allPass( ) {
+          ctx._pfFilter.filterCols[i].useCustomFilter : function allPass () {
             // console.warn('WARNING: custom filter function for option: \"', ctx._pfFilter.filterCols[i].placeholder,'\" set to non-function type; using all-pass filter instead.');
             return true;
           }))
@@ -422,7 +428,9 @@
 
       if (ctx._pfFilter.filterOnSelect) {
         if (addFilter(dt, newFilter)) {
-          if (newFilter.customFilter) { $.fn.dataTable.ext.search.push(newFilter.customFilter); }
+          if (newFilter.customFilter) {
+            $.fn.dataTable.ext.search.push(newFilter.customFilter);
+          }
           dt.draw();
           addActiveFilterControl(dt, newFilter);
           updateFilterResults(dt);
