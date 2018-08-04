@@ -197,7 +197,7 @@
       // Must match all filters
       if (ctx._pfFilter) {
         $.each(ctx._pfFilter.filters, function (index, filter) {
-          if (filter.customFilter) return true;
+          if (filter.customFilter) { return true; }
           if (ctx._pfFilter.filterCaseInsensitive !== undefined && ctx._pfFilter.filterCaseInsensitive === true) {
             if (data[filter.column].toLowerCase().indexOf(filter.value.toLowerCase()) === -1) {
               showThisRow = false;
@@ -207,6 +207,7 @@
               showThisRow = false;
             }
           }
+          return false;
         });
       }
       return showThisRow;
@@ -242,7 +243,7 @@
         if (filter.customFilter) {
           if (ctx._pfFilter.filters[i].name === filter.name) {
             ctx._pfFilter.filters.splice(i, 1);
-            $.fn.dataTable.ext.search.splice(i+1, 1);
+            $.fn.dataTable.ext.search.splice(i + 1, 1);
             $(this).parents("li").remove();
             break;
           }
@@ -292,7 +293,7 @@
     });
 
     // Add new filter
-    if (!found) ctx._pfFilter.filters.push(filter);
+    if (!found) { ctx._pfFilter.filters.push(filter); }
 
     return !found;
   }
@@ -341,22 +342,22 @@
     }
     ctx._pfFilter.filterInput.on("keypress", function (e) {
       var keycode = (e.keyCode ? e.keyCode : e.which);
+      var newFilter = {
+        column: ctx._pfFilter.filterColumn,
+        name: ctx._pfFilter.filterName,
+        value: this.value,
+        onSelect: false,
+        // If filterOnSelect is true, the custom filter will have already been
+        // added to the filter stack so we set it to null here. If the defined
+        // function is wrong type, set the function to simple all pass.
+        customFilter: (ctx._pfFilter.filterOnSelect) ? null : ctx._pfFilter.filterFunction
+      };
+
       if (keycode === 13) {
         e.preventDefault();
         if (this.value.trim().length > 0) {
-          var newFilter = {
-            column: ctx._pfFilter.filterColumn,
-            name: ctx._pfFilter.filterName,
-            value: this.value,
-            onSelect: false,
-            // If filterOnSelect is true, the custom filter will have already been
-            // added to the filter stack so we set it to null here. If the defined
-            // function is wrong type, set the function to simple all pass.
-            customFilter: (ctx._pfFilter.filterOnSelect) ? null : ctx._pfFilter.filterFunction
-          };
-
           if (addFilter(dt, newFilter)) {
-            if (newFilter.customFilter) $.fn.dataTable.ext.search.push(newFilter.customFilter);
+            if (newFilter.customFilter) { $.fn.dataTable.ext.search.push(newFilter.customFilter); }
             dt.draw();
             addActiveFilterControl(dt, newFilter);
             updateFilterResults(dt);
@@ -378,8 +379,16 @@
    */
   function handleFilterOption (dt, i) {
     var ctx = dt.settings()[0];
+    var newFilter = {
+      column: ctx._pfFilter.filterColumn,
+      name: ctx._pfFilter.filterName,
+      value: "",
+      onSelect: true,
+      customFilter: ctx._pfFilter.filterFunction
+    };
+
     if (ctx._pfFilter.filterCols[i] === null || ctx._pfFilter.filterCols[i].optionSelector === undefined) {
-      return;
+      return ;
     }
     $(ctx._pfFilter.filterCols[i].optionSelector).on("click", function (e) {
       // Set input placeholder
@@ -404,28 +413,22 @@
       // type, define all-pass fileter.
       ctx._pfFilter.filterFunction = (ctx._pfFilter.filterCols[i].useCustomFilter) ?
         (($.isFunction(ctx._pfFilter.filterCols[i].useCustomFilter) ?
-          ctx._pfFilter.filterCols[i].useCustomFilter : function allPass() {
-            console.warn('WARNING: custom filter function for option: \"', ctx._pfFilter.filterCols[i].placeholder,'\" set to non-function type; using all-pass filter instead.');
-            return true }))
+          ctx._pfFilter.filterCols[i].useCustomFilter : function allPass( ) {
+            // console.warn('WARNING: custom filter function for option: \"', ctx._pfFilter.filterCols[i].placeholder,'\" set to non-function type; using all-pass filter instead.');
+            return true;
+          }))
         : null;
       ctx._pfFilter.filterName = $(this).text(); // Save filter name for active filter control
 
       if (ctx._pfFilter.filterOnSelect) {
-        var newFilter = {
-          column: ctx._pfFilter.filterColumn,
-          name: ctx._pfFilter.filterName,
-          value: "",
-          onSelect: true,
-          customFilter: ctx._pfFilter.filterFunction
-        };
-
         if (addFilter(dt, newFilter)) {
-          if (newFilter.customFilter) $.fn.dataTable.ext.search.push(newFilter.customFilter);
+          if (newFilter.customFilter) { $.fn.dataTable.ext.search.push(newFilter.customFilter); }
           dt.draw();
           addActiveFilterControl(dt, newFilter);
           updateFilterResults(dt);
         }
       }
+      return true;
     });
   }
 
