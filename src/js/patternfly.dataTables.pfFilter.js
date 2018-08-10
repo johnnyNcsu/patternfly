@@ -160,6 +160,8 @@
   var FILTER_LABEL_SELECTOR = FILTER_SELECTOR + " label"; // Filter label
   var RESULTS_SELECTOR = ".toolbar-pf-results"; // Toolbar results row
   var FILTER_RESULTS_SELECTOR = RESULTS_SELECTOR + " h5"; // Toolbar filter results
+  var FILTER_INPUT_PLACEHOLDER = null; // Set this in handleFilterOption
+  var FILTER_BUTTON_TEXT = null; // Set this in handleFilterOption
 
   DataTable.pfFilter = {};
 
@@ -284,6 +286,9 @@
       }
       if (ctx._pfFilter.filters.length === 0) {
         ctx._pfFilter.activeFilters.addClass("hidden"); // Hide
+        // Restore initial button and input field text
+        document.getElementById("filterInput").placeholder = FILTER_INPUT_PLACEHOLDER;
+        document.getElementById("filter").innerHTML = FILTER_BUTTON_TEXT;
       }
       dt.draw();
       updateFilterResults(dt);
@@ -339,6 +344,9 @@
     $.fn.dataTable.ext.search.length = 1; // Remove all but simple filter from DataTable
     ctx._pfFilter.activeFilterControls.html(""); // Remove active filter controls
     ctx._pfFilter.activeFilters.addClass("hidden"); // Hide active filters area
+    // Restore initial button and input field text
+    document.getElementById("filterInput").placeholder = FILTER_INPUT_PLACEHOLDER;
+    document.getElementById("filter").innerHTML = FILTER_BUTTON_TEXT;
     dt.draw();
   }
 
@@ -426,6 +434,11 @@
     }
     $(ctx._pfFilter.filterCols[i].optionSelector).on("click", function (e) {
       var newFilter = new Object();
+      if (FILTER_BUTTON_TEXT === null) {// Save off initial button and Placeholder
+                                        // text to restore when filters are cleared.
+        FILTER_INPUT_PLACEHOLDER = document.getElementById("filterInput").placeholder;
+        FILTER_BUTTON_TEXT = document.getElementById("filter").innerHTML;
+      }
 
       // Set input placeholder
       if (ctx._pfFilter.filterInput !== undefined && ctx._pfFilter.filterInput.length !== 0) {
@@ -450,7 +463,7 @@
       ctx._pfFilter.filterFunction = (ctx._pfFilter.filterCols[i].useCustomFilter) ?
         (($.isFunction(ctx._pfFilter.filterCols[i].useCustomFilter) ?
           ctx._pfFilter.filterCols[i].useCustomFilter : allPass))
-        : allPass;
+        : null;
       ctx._pfFilter.filterName = $(this).text(); // Save filter name for active filter control
 
       if (ctx._pfFilter.filterOnSelect) {
