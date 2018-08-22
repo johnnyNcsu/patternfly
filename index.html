@@ -3,35 +3,43 @@
 
 <head>
     <meta charset="utf-8">
-    <title>PF Filter Example</title>
+    <title>PF Filter Custom Filtering Example</title>
 
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="dist/img/favicon.ico">
+    <!-- iPad retina icon -->
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="dist/img/apple-touch-icon-precomposed-152.png">
+    <!-- iPad retina icon (iOS < 7) -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="dist/img/apple-touch-icon-precomposed-144.png">
+    <!-- iPad non-retina icon -->
+    <link rel="apple-touch-icon-precomposed" sizes="76x76" href="dist/img/apple-touch-icon-precomposed-76.png">
+    <!-- iPad non-retina icon (iOS < 7) -->
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="dist/img/apple-touch-icon-precomposed-72.png">
+    <!-- iPhone 6 Plus icon -->
+    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="dist/img/apple-touch-icon-precomposed-180.png">
+    <!-- iPhone retina icon (iOS < 7) -->
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="dist/img/apple-touch-icon-precomposed-114.png">
+    <!-- iPhone non-retina icon (iOS < 7) -->
+    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="dist/img/apple-touch-icon-precomposed-57.png">
 
     <link rel="stylesheet" type="text/css" href="dist/css/patternfly.min.css">
     <link rel="stylesheet" type="text/css" href="dist/css/patternfly-additions.min.css">
 </head>
 
-<!--<script src="/bower_components/jquery/dist/jquery.js"></script>-->
-<!--<script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>-->
-<!--<script src="node_modules/patternfly/node_modules/jquery/dist/jquery.js"></script>-->
-<!--<script src="node_modules/patternfly/node_modules/bootstrap/dist/js/bootstrap.js"></script>-->
-
 <!-- jQuery -->
-<script src="node_modules/jquery/dist/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 
 <!-- Bootstrap JS -->
-<script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
-
-<!-- C3, D3 - Charting Libraries -->
-<!--<script src="node_modules/patternfly/node_modules/c3/c3.min.js"></script>-->
-<!--<script src="node_modules/patternfly/node_modules/d3/d3.min.js"></script>-->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
 <!-- Datatables, jQuery Grid Component -->
 <!-- Note: jquery.dataTables.js must occur in the html source before patternfly*.js.-->
 <!--<script src="node_modules/patternfly/node_modules/datatables/media/js/jquery.dataTables.min.js"></script>orig-->
-<script src="node_modules/datatables.net/js/jquery.dataTables.js"></script>
-<script src="node_modules/drmonty-datatables-colvis/js/dataTables.colVis.js"></script>
-<script src="node_modules/datatables.net-colreorder/js/dataTables.colReorder.js"></script>
-<script src="node_modules/datatables.net-select/js/dataTables.select.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.colVis.min.js"></script>
+<script src="https://cdn.datatables.net/colreorder/1.5.1/js/dataTables.colReorder.min.js"></script>
+<script src="https://cdn.datatables.net/select/1.2.0/js/dataTables.select.min.js"></script>
 
 <!-- PatternFly Custom Componets -  Sidebar, Popovers and Datatables Customizations -->
 <!-- Note: jquery.dataTables.js must occur in the html source before patternfly*.js.-->
@@ -43,46 +51,20 @@
 <script src="src/js/patternfly.dataTables.pfFilter.js"></script>
 <!--<script src="node_modules/patternfly/dist/js/patternfly.dataTables.pfPagination.js"></script>
 
-<!-- Bootstrap Combobox -->
-<script src="node_modules/patternfly-bootstrap-combobox/js/bootstrap-combobox.js"></script>
-
-<!-- Bootstrap Date Picker -->
-<script src="node_modules/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
-
-<!-- Moment - required by Bootstrap Date Time Picker -->
-<script src="node_modules/moment/min/moment.min.js"></script>
-
-<!-- Bootstrap Date Time Picker - requires Moment -->
-<script src="node_modules/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
-
 <!-- Bootstrap Select -->
-<script src="node_modules/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
 
-<!-- Bootstrap Switch -->
-<script src="node_modules/bootstrap-switch/dist/js/bootstrap-switch.min.js"></script>
-
-<!-- Bootstrap Touchspin -->
-<script src="node_modules/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.min.js"></script>
-
-<!-- Bootstrap Tree View -->
-<script src="node_modules/patternfly-bootstrap-treeview/dist/bootstrap-treeview.min.js"></script>
-
-<!-- Google Code Prettify - Syntax highlighting of code snippets -->
-<!--<script src="node_modules/patternfly/node_modules/google-code-prettify/bin/prettify.min.js"></script>-->
-
-<!-- MatchHeight - Used to make sure dashboard cards are the same height -->
-<!--<script src="node_modules/patternfly/node_modules/jquery-match-height/jquery.matchHeight-min.js"></script>orig-->
-<!--<script src="node_modules/patternfly/node_modules/jquery-match-height/dist/jquery.matchHeight-min.js"></script>-->
-
-<!-- Local d3 path -->
-<!--<script src="node_modules/d3/d3.min.js"></script>-->
-<!-- The 'official' path. Comment out, when working locally. -->
-<!--<script src="http://d3js.org/d3.v3.min.js"></script>-->
-
-<!--<script src="d3-geomap/vendor/d3.geomap.dependencies.min.js"></script-->
-<!--<script src="d3-geomap/js/d3.geomap.min.js"></script>-->
-
-<body><!-- Toolbar -->
+<body>
+  <div class="container">
+  <div class="page-header">
+    <h1>PF Filter Custom Filtering Example</h1>
+  </div>
+  <div class="alert alert-warning">
+    <span class="pficon pficon-warning-triangle-o"></span>
+    These examples are included for development testing purposes.  For official documentation, see <a href="https://www.patternfly.org" class="alert-link">https://www.patternfly.org</a>, <a href="http://getbootstrap.com" class="alert-link">http://getbootstrap.com</a>, and <a href="http://datatables.net" class="alert-link">http://datatables.net</a>.
+  </div>
+  <hr>
+<!-- Toolbar -->
 <div class="row toolbar-pf table-view-pf-toolbar" id="toolbar1">
   <div class="col-sm-12">
     <form class="toolbar-pf-actions">
@@ -729,15 +711,12 @@ var findTableViewUtil = function (config) {
 new findTableViewUtil();
 
 });
-</script>
 
-
-<!--<script src="/components/datatables/media/js/jquery.dataTables.js"></script>-->
-<script>
 // Initialize Datatables
 $(document).ready(function() {
 $('.datatable').dataTable();
 });
 </script>
+</div><!-- /container -->
 </body>
 </html>
